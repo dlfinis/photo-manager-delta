@@ -1,0 +1,7 @@
+processing:
+  raw_conversion: false
+  thumbnail_generation: "1024x768"
+  metadata_preservation: "all"
+storage:
+  hierarchy: "%Y/%B"
+  naming: "{original_name}"

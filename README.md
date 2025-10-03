@@ -22,19 +22,13 @@ chmod +x install_deps.sh
 ## 🚀 Basic Usage
 ```bash
 # Consolidate photos from multiple sources
-python3 consolidator.py --input ~/takeout/ --output /media/photo-server/
-
-# Remove duplicates with different strategies
-python3 duplicater.py --algorithm phash --threshold 0.90
-
-# Organize by date and content type
-python3 organizer.py --time-window 2h --group-events
+python3 consolidator.py --source ~/takeout/ --destination /media/photo-server/
 
 # Manual definitions
 python consolidator.py \
-    --input ./takeout/ \
-    --output /media/photo-server/
-    --threshold 0.90 \
+    --source ./takeout/ \
+    --destination /media/photo-server/ \
+    --visual-threshold 0.90 \
     --temporal-threshold 3 \
     --verbose
 ```
@@ -53,7 +47,7 @@ storage:
 
 ## 📚 Supported Formats
 | Category      | Formats                          |
-|---------------|----------------------------------|
+|----------------------------------|
 | RAW Images    | CR2, NEF, ARW, DNG, RW2         |
 | Standard      | JPEG, PNG, WebP, HEIC           |
 | Video         | MP4, MOV, AVI (metadata only)   |
