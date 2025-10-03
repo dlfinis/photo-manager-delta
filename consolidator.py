@@ -59,12 +59,21 @@ class PhotoConsolidator:
         """Validate initial configuration"""
         self.logger.info("🔍 Validating configuration...")
 
-        # Validate folders
-        if not self.source.exists():
-            raise FileNotFoundError(f"Source folder does not exist: {self.source}")
+        # Validate destination folder
+        if not self.destination.exists():
+            raise FileNotFoundError(f"Destination folder does not exist: {self.destination}")
 
-        if self.source == self.destination:
-            raise ValueError("Source and destination folders cannot be the same")
+        # Validate source folders
+        for source_path in self.source:
+            if not source_path.exists():
+                raise FileNotFoundError(f"Source folder does not exist: {source_path}")
+
+        # Check if any source is the destination or temp dir to avoid loops
+        for source_path in self.source:
+            if source_path == self.destination:
+                raise ValueError(f"Source folder '{source_path}' cannot be the same as destination folder")
+            if source_path == self.temp_dir:
+                raise ValueError(f"Source folder '{source_path}' cannot be the same as temp folder")
 
         # Create necessary folders
         self.destination.mkdir(parents=True, exist_ok=True)
@@ -224,9 +233,9 @@ Examples:
         """
     )
 
-    parser.add_argument("--source", required=True, type=Path,
-                       help="Source folder with photos to consolidate")
-    parser.add_argument("--destination", required=True, type=Path,
+    parser.add_argument("--source", required=False, type=Path, nargs='+',
+                       help="Source folder(s) with photos to consolidate")
+    parser.add_argument("--destination", required=False, type=Path,
                        help="Destination folder for consolidated photos")
     parser.add_argument("--temp", type=Path, default=Path("/tmp/consolidation"),
                        help="Temporary folder for processing")
@@ -256,8 +265,25 @@ Examples:
         # Load configuration
         config = load_config()
         
+        # Determine source and destination paths
+        # Priority: Command line args > Config file > Error
+        source_path = args.source
+        destination_path = args.destination
+
+        if not source_path:
+            source_path = config.get('paths', {}).get('source')
+            if not source_path:
+                print("❌ Error: Source path not provided. Please specify --source or set 'paths.source' in config.yaml")
+                sys.exit(1)
+        
+        if not destination_path:
+            destination_path = config.get('paths', {}).get('destination')
+            if not destination_path:
+                print("❌ Error: Destination path not provided. Please specify --destination or set 'paths.destination' in config.yaml")
+                sys.exit(1)
+
         # Create and execute consolidator
-        consolidator = PhotoConsolidator(args.source, args.destination, args.temp, config)
+        consolidator = PhotoConsolidator(Path(source_path), Path(destination_path), args.temp, config)
         consolidator.execute_consolidation(
             dry_run=args.dry_run,
             skip_visual=args.skip_visual,

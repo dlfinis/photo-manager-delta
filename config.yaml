@@ -1,3 +1,6 @@
+paths:
+  source: ["./photos_to_consolidate"]  # Lista de rutas por defecto para las carpetas de origen
+  destination: "./consolidated_photos"  # Ruta por defecto para la carpeta de destino
 processing:
   raw_conversion: false
   thumbnail_generation: "1024x768"

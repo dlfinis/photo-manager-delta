@@ -35,20 +35,22 @@ class FileManager:
         self.all_extensions = self.img_extensions | self.raw_extensions
 
     def collect_files(self) -> List[Path]:
-        """Collect all image files"""
+        """Collect all image files from multiple source directories"""
         self.logger.info("📁 Collecting files...")
 
         files = []
 
-        # Search in source
-        for ext in self.all_extensions:
-            files.extend(self.source.rglob(f"*{ext}"))
-            files.extend(self.source.rglob(f"*{ext.upper()}"))
+        # Search in each source directory
+        for source_dir in self.source:
+            self.logger.info(f"📁 Searching in: {source_dir}")
+            for ext in self.all_extensions:
+                files.extend(source_dir.rglob(f"*{ext}"))
+                files.extend(source_dir.rglob(f"*{ext.upper()}"))
 
         # Filter only valid files
         files = [f for f in files if f.is_file() and f.stat().st_size > 0]
 
-        self.logger.info(f"📁 Files found: {len(files)}")
+        self.logger.info(f"📁 Total files found: {len(files)}")
         return files
 
     def get_creation_time(self, file_path: Path) -> float:
